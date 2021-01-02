@@ -1,0 +1,38 @@
+.MemePrompt-container {
+	display: flex;
+  flex-direction: column;
+  align-items: center;
+	justify-content: center;
+  font-size: calc(10px + 2vmin); 
+}
+
+.MemePrompt-input {
+  padding: 1em;
+  margin: 1em;
+  width: 60vw;
+}
+
+.MemePrompt-submit {
+  margin: 0.5em;
+  padding: 0.5em;
+  width: 10em;
+}
+
+.MemePrompt-captions-container {
+  list-style-type: none;
+  padding: 1vw;
+}
+
+.MemePrompt-canvas-container {
+  max-width: 80%;
+  max-height: auto;
+  padding: 1em;
+}
+
+.MemePrompt-input {
+  display: block;
+}
+
+MemePrompt-label {
+  display: block;
+}

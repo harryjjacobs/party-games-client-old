@@ -1,0 +1,127 @@
+.App {
+  text-align: center;
+}
+
+.App-logo {
+  animation: App-logo-spin infinite 20s linear;
+  height: 40vmin;
+  pointer-events: none;
+}
+
+.App-header {
+  background-color: #1d2938;
+  min-height: 10vh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  font-size: calc(10px + 2vmin);
+  color: white;
+}
+
+.App-body {
+  background-color: #282c34;
+  min-height: 90vh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  color: white;
+}
+
+.App-link {
+  color: #61dafb;
+}
+
+.ErrorMessage-text {
+  color: crimson;
+}
+
+.App-text-input {
+  border-radius: 0.2em;
+  border: none;
+  padding: 1em;
+  width: 20em;
+  height: 15px;
+  font-size: calc(10px + 2vmin);
+  text-transform: uppercase;
+}
+
+.App-button {
+  display: inline-block;
+  padding: 0.3em 1.2em;
+  margin: 0 0.3em 0.3em 0;
+  border-radius: 0.2em;
+  box-sizing: border-box;
+  border: none;
+  text-decoration: none;
+  font-family: 'Roboto', sans-serif;
+  font-size: calc(10px + 2vmin);
+  font-weight: 300;
+  color: #FFFFFF;
+  background-color: #4eb5f1;
+  text-align: center;
+  transition: all 0.2s;
+}
+
+.App-button:hover {
+  color: #000000;
+  background-color: #4095c6;
+}
+
+@media all and (max-width:30em) {
+  .App-button {
+    display: block;
+    margin: 0.2em auto;
+  }
+}
+
+.hidden {
+  display: none;
+}
+
+.TextPrompt-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  font-size: calc(10px + 2vmin);
+}
+
+.TextPrompt-input {
+  padding: 1em;
+  margin: 1em;
+  width: 60vw;
+}
+
+.TextPrompt-submit {
+  margin: 0.5em;
+  padding: 0.5em;
+  width: 10em;
+}
+
+.TextPrompt-label {
+  font-size: calc(10px + 4vmin);
+  margin: 0px;
+  padding: 1vmin;
+}
+
+.MultiChoicePrompt-label {
+  font-size: calc(10px + 4vmin);
+  margin: 1em;
+  padding: 1vmin;
+}
+
+.MultiChoicePrompt-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  font-size: calc(10px + 3.5vmin);
+  list-style-type: none;
+  padding: 1vw;
+}
+
+.MultiChoicePrompt-item {
+  flex: 1;
+}
