@@ -1,9 +1,10 @@
+@import url('https://fonts.googleapis.com/css2?family=Montserrat:wght@900&display=swap');
 .MemePrompt-container {
-	display: flex;
+  display: flex;
   flex-direction: column;
   align-items: center;
-	justify-content: center;
-  font-size: calc(10px + 2vmin); 
+  justify-content: center;
+  font-size: calc(10px + 2vmin);
 }
 
 .MemePrompt-input {
@@ -24,8 +25,8 @@
 }
 
 .MemePrompt-canvas-container {
-  max-width: 80%;
-  max-height: auto;
+  width: 80%;
+  height: auto;
   padding: 1em;
 }
 

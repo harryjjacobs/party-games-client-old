@@ -13,8 +13,7 @@ class MultiChoicePrompt extends React.Component {
   handleChoiceClick(choice) {
     if (typeof (this.props.onSubmit) === 'function') {
       this.props.onSubmit({
-        type: INPUT_TYPE_MULTI_CHOICE,
-        id: this.props.data.id,
+        contestId: this.props.promptData.contestId,
         choice: choice
       });
     }
@@ -24,9 +23,9 @@ class MultiChoicePrompt extends React.Component {
     return (
       <ul className="MultiChoicePrompt-container">
         <span className="MultiChoicePrompt-label">
-          {this.props.data.prompt}
+          {this.props.promptData.prompt}
         </span>
-        {this.props.data.options.map((item, i) => {
+        {this.props.promptData.options.map((item, i) => {
           return <li key={i} className="MultiChoicePrompt-item">
             <button className="App-button"
               onClick={() => this.handleChoiceClick(i)} >{item}</button>

@@ -1,5 +1,4 @@
 import React from 'react';
-import io from 'socket.io-client';
 
 const ClientMessageNames = {
   MESSAGE_TYPE_PROMPT_RESPONSE: 'prompt_response',
@@ -10,80 +9,91 @@ const ClientMessageNames = {
 const ServerMessageNames = {
   MESSAGE_TYPE_ACCEPT_JOIN: 'accept_join',
   MESSAGE_TYPE_REJECT_JOIN: 'reject_join',
+  MESSAGE_TYPE_ACCEPT_REJOIN: 'accept_rejoin',
   MESSAGE_TYPE_REJECT_REJOIN: 'reject_rejoin',
   MESSAGE_TYPE_REJECT_INPUT: 'reject_input',
   MESSAGE_TYPE_REQUEST_INPUT: 'request_input',
   MESSAGE_TYPE_HIDE_PROMPT: 'hide_prompt',
 }
 
+const CONNECTION_RETRY_INTERVAL = 2000; // milliseconds
+
 class Comms extends React.Component {
   constructor(props) {
     super(props);
-
-    this.socket = io('http://localhost:3000/players', /*{ transports: ['websocket'] }*/);
 
     this.state = {
       connected: false,
       joined: false,
       showPrompt: false,
-      promptData: {},
+      messageData: {},
       error: false,
       errorText: ''
     };
 
-    this.handleDisconnect = this.handleDisconnect.bind(this);
-    this.handleConnect = this.handleConnect.bind(this);
-    this.handleMessage = this.handleMessage.bind(this);
-    this.requestJoin = this.requestJoin.bind(this);
-    this.sendMessage = this.sendMessage.bind(this);
-
-    this.socket.on('connect', this.handleConnect);
-    this.socket.on('disconnect', this.handleDisconnect);
-
-    this.socket.on('message', (msg) => {
-      this.handleMessage(msg);
-    });
+    this.connect();
   }
 
-  handleConnect(msg) {
+  connect() {
+    console.log('attempting to connect...');
+    this.socket = new WebSocket('ws://localhost:3000/players');
+    this.socket.onopen = () => this.handleOpen();
+    this.socket.onclose = () => this.handleClose();
+    this.socket.onerror = (error) => this.handleError(error);
+    this.socket.onmessage = (msg) => this.handleMessage(msg.data);
+  }
+
+  handleOpen() {
     console.log('connected to server')
     this.setState({ connected: true });
     if (sessionStorage.getItem('rejoin') === 'true') {
-      this.requestRejoin(
-        sessionStorage.getItem('roomCode'),
-        sessionStorage.getItem('clientId')
-      );
+      const roomCode = sessionStorage.getItem('roomCode');
+      const clientId = sessionStorage.getItem('clientId')
+      if (roomCode && clientId) {
+        this.requestRejoin(
+          roomCode,
+          clientId
+        );
+      }
     }
   }
 
-  handleDisconnect(msg) {
+  handleClose() {
     this.setState({
       connected: false,
       joined: false,
       showPrompt: false,
       inputData: {},
     });
+    setTimeout(() => this.connect(), CONNECTION_RETRY_INTERVAL);
   }
 
-  sendMessage(roomCode, messageType, messageData) {
+  handleError(event) {
+    console.log('websocket error ', event);
+    this.socket.close();
+  }
+
+  sendMessage(messageType, roomCode, messageData) {
     //message.time = Math.floor(Date.now() / 1000);
+    messageData.roomCode = roomCode;
     const message = {
-      roomCode: roomCode,
       type: messageType,
       data: messageData
     };
-    this.socket.send(message);
+    this.socket.send(JSON.stringify(message));
     console.log(`${messageType} sent to room ${roomCode}: ${JSON.stringify(message)}`);
   }
 
   sendPromptResponse(messageData) {
     this.sendMessage(
-      this.state.roomCode,
       ClientMessageNames.MESSAGE_TYPE_PROMPT_RESPONSE,
+      this.state.roomCode,
       messageData
     );
     // Hide the prompt once we've sent a response
     this.setState({ showPrompt: false });
+    // Clear saved prompt
+    sessionStorage.setItem('lastPrompt', '');
   }
 
   requestJoin(roomCode, username) {
@@ -95,8 +105,8 @@ class Comms extends React.Component {
       return;
     }
     this.sendMessage(
-      roomCode,
       ClientMessageNames.MESSAGE_TYPE_REQUEST_JOIN,
+      roomCode,
       { username: username }
     );
     this.setState({
@@ -107,18 +117,28 @@ class Comms extends React.Component {
 
   requestRejoin(roomCode, clientId) {
     this.sendMessage(
-      roomCode,
       ClientMessageNames.MESSAGE_TYPE_REQUEST_REJOIN,
+      roomCode,
       { oldClientId: clientId }
     );
     console.log(`Requesting to rejoin room ${roomCode} using stored clientId ${clientId} `);
   }
 
-  handleMessage(message) {
-    console.log(`message received: ${JSON.stringify(message)}`);
-
-    switch (message.messageType) {
+  handleMessage(messageRaw) {
+    console.log(`message received: ${messageRaw}`);
+    let message;
+    try {
+      message = JSON.parse(messageRaw);
+    } catch (error) {
+      console.debug('invalid message recieved', message);
+      return;
+    }
+    switch (message.type) {
       case ServerMessageNames.MESSAGE_TYPE_ACCEPT_JOIN:
+        if (!message.data.clientId || !message.data.roomCode) {
+          console.debug(`invalid ${ServerMessageNames.MESSAGE_TYPE_ACCEPT_JOIN} message`);
+          break;
+        }
         this.setState({
           joined: true,
           roomCode: message.data.roomCode
@@ -130,19 +150,49 @@ class Comms extends React.Component {
         // Store the roomCode
         sessionStorage.setItem('roomCode', message.data.roomCode);
         break;
+      case ServerMessageNames.MESSAGE_TYPE_ACCEPT_REJOIN:
+        if (!message.data.clientId || !message.data.roomCode) {
+          console.debug(`invalid ${ServerMessageNames.MESSAGE_TYPE_ACCEPT_REJOIN} message`);
+          break;
+        }
+        this.setState({
+          joined: true,
+          roomCode: message.data.roomCode
+        });
+        // In the event of a disconnect, attempt to rejoin
+        sessionStorage.setItem('rejoin', 'true');
+        // Store the clientId
+        sessionStorage.setItem('clientId', message.data.clientId);
+        // Store the roomCode
+        sessionStorage.setItem('roomCode', message.data.roomCode);
+        // Restore any unhandled prompts
+        // TODO: store timestamp and don't restore very old data
+        try {
+          const lastPrompt = JSON.parse(sessionStorage.getItem('lastPrompt'));
+          if (lastPrompt) {
+            // Show prompt
+            this.setState({
+              showPrompt: true,
+              promptData: lastPrompt,
+            });
+          }
+        } catch { }
+        break;
       case ServerMessageNames.MESSAGE_TYPE_REJECT_JOIN:
         // Hide previous error
         this.setState({ error: false });
         // Show new error
         this.setState({
+          joined: false,
           error: true,
-          errorText: message.data.reason,
-          joined: false
+          errorText: message.data.reason
         });
         // In the event of a disconnect, don't attempt to rejoin
         sessionStorage.setItem('rejoin', 'false');
         // Clear the clientId, it's no longer valid
         sessionStorage.setItem('clientId', '');
+        // Clear the roomCode, it's no longer valid
+        sessionStorage.setItem('roomCode', '');
         break;
       case ServerMessageNames.MESSAGE_TYPE_REJECT_REJOIN:
         this.setState({ joined: false });
@@ -150,6 +200,8 @@ class Comms extends React.Component {
         sessionStorage.setItem('rejoin', 'false');
         // Clear the clientId, it's no longer valid
         sessionStorage.setItem('clientId', '');
+        // Clear the roomCode, it's no longer valid
+        sessionStorage.setItem('roomCode', '');
         break;
       case ServerMessageNames.MESSAGE_TYPE_REJECT_INPUT:
         this.setState({
@@ -161,14 +213,17 @@ class Comms extends React.Component {
         // Show prompt
         this.setState({
           showPrompt: true,
-          promptData: message.data.prompt,
+          promptData: message.data,
         });
+        sessionStorage.setItem('lastPrompt', JSON.stringify(message.data));
         break;
       case ServerMessageNames.MESSAGE_TYPE_HIDE_PROMPT:
         // Hide input display
         this.setState({ showPrompt: false });
+        sessionStorage.removeItem('lastPrompt');
         break;
       default:
+        console.log(`message type ${message.type} not handled`);
         break;
     }
   }

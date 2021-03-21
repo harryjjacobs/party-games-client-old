@@ -7,7 +7,7 @@ export default class TextPrompt extends React.Component {
 
   constructor(props) {
     super(props);
-    this.state = { values: new Array(this.props.data.prompts.length) };
+    this.state = { values: new Array(this.props.promptData.prompts.length) };
 
     this.handleInputChange = this.handleInputChange.bind(this);
     this.handleSubmitClick = this.handleSubmitClick.bind(this);
@@ -19,7 +19,10 @@ export default class TextPrompt extends React.Component {
 
   handleSubmitClick() {
     if (typeof (this.props.onSubmit) === 'function') {
-      this.props.onSubmit(this.state.values);
+      this.props.onSubmit({
+        values: this.state.values,
+        id: this.props.promptData.id
+      });
     }
   }
 
@@ -41,7 +44,7 @@ export default class TextPrompt extends React.Component {
     return (
       <div className="TextPrompt-container" >
         {
-          this.props.data.prompts.map((prompt, index) => this.renderInputField(index, prompt))
+          this.props.promptData.prompts.map((prompt, index) => this.renderInputField(index, prompt))
         }
         <button className="TextPrompt-input TextPrompt-submit App-button"
           onClick={this.handleSubmitClick} >SUBMIT</button>

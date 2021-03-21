@@ -3,7 +3,9 @@ import Comms from './Comms';
 import ErrorMessage from "./ErrorMessage";
 import TextPrompt, { INPUT_TYPE_TEXT } from "./prompts/TextPrompt";
 import MultiChoicePrompt, { INPUT_TYPE_MULTI_CHOICE } from "./prompts/MultiChoicePrompt";
-import MemePrompt, { INPUT_TYPE_MEME_PROMPT } from "./prompts/MemePrompt"
+import MemePrompt, { INPUT_TYPE_MEME } from "./prompts/MemePrompt"
+import ButtonPrompt, { INPUT_TYPE_BUTTON } from "./prompts/ButtonPrompt"
+
 import './App.css';
 
 class App extends React.Component {
@@ -17,7 +19,7 @@ class App extends React.Component {
       showError: false,
       errorText: "",
       showPrompt: false,
-      promptData: {},
+      messageData: {},
     };
 
     this.commsRef = React.createRef();
@@ -32,20 +34,24 @@ class App extends React.Component {
   }
 
   renderInputPrompt = () => {
-    var inputType = this.state.promptData.type;
+    console.log(this.state.messageData);
+    var promptType = this.state.messageData.promptType;
     var Prompt;
-    if (inputType === INPUT_TYPE_MEME_PROMPT) {
+    if (promptType === INPUT_TYPE_BUTTON) {
+      Prompt = ButtonPrompt;
+    } else if (promptType === INPUT_TYPE_MEME) {
       Prompt = MemePrompt;
-    } else if (inputType === INPUT_TYPE_MULTI_CHOICE) {
+    } else if (promptType === INPUT_TYPE_MULTI_CHOICE) {
       Prompt = MultiChoicePrompt;
-    } else if (inputType === INPUT_TYPE_TEXT) {
+    } else if (promptType === INPUT_TYPE_TEXT) {
       Prompt = TextPrompt;
     } else {
-      console.warn("[renderInputPrompt] inputType " + inputType + " invalid.");
+      console.warn("[renderInputPrompt] promptType " + promptType + " invalid.");
+      return null;
     }
 
     return <Prompt className="App-question-prompt"
-      data={this.state.promptData}
+      promptData={this.state.messageData.promptData}
       onSubmit={data => this.sendPromptResponse(data)}
     />
   }
@@ -53,11 +59,11 @@ class App extends React.Component {
   renderJoinInput = () => {
     return (
       <TextPrompt className="App-join-prompt"
-        data={
+        promptData={
           { prompts: ["ROOM CODE", "USERNAME"] }
         }
         onSubmit={
-          (response) => this.sendJoinRequest(response[0], response[1])
+          (response) => this.sendJoinRequest(response.values[0], response.values[1])
         }
       />
     );
@@ -87,7 +93,7 @@ class App extends React.Component {
               (state) => this.setState({ joined: state })
             }
             onShowInputPrompt={
-              (data) => this.setState({ showPrompt: true, promptData: data })
+              (data) => this.setState({ showPrompt: true, messageData: data })
             }
             onHideInputPrompt={
               () => this.setState({ showPrompt: false })
