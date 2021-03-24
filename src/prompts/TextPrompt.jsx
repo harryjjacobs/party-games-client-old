@@ -26,7 +26,7 @@ export default class TextPrompt extends React.Component {
     }
   }
 
-  renderInputField = (index, prompt) => {
+  renderInputField = (index, prompt, maxLength) => {
     return (
       <div className="TextPrompt-field" key={index}>
         <label className="TextPrompt-input TextPrompt-label"
@@ -34,6 +34,7 @@ export default class TextPrompt extends React.Component {
         <input className="App-text-input TextPrompt-input TextPrompt-prompt"
           name={`textinput_${index}`} id={`textinput_${index}`} type="text"
           value={this.state.value}
+          maxlength={maxLength}
           onChange={(event) => this.handleInputChange(index, event.target.value.toUpperCase())}
         />
       </div>
@@ -44,7 +45,7 @@ export default class TextPrompt extends React.Component {
     return (
       <div className="TextPrompt-container" >
         {
-          this.props.promptData.prompts.map((prompt, index) => this.renderInputField(index, prompt))
+          this.props.promptData.prompts.map((prompt, index) => this.renderInputField(index, prompt, this.props.promptData.maxInputLength))
         }
         <button className="TextPrompt-input TextPrompt-submit App-button"
           onClick={this.handleSubmitClick} >SUBMIT</button>

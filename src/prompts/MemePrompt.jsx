@@ -203,6 +203,7 @@ class MemePrompt extends React.Component {
                 htmlFor="textinput">{"Caption " + (i + 1) + ":"}</label>
               <input className="App-text-input MemePrompt-input MemePrompt-prompt"
                 name="textinput" id={"textinput" + i} type="text"
+                maxLength={this.props.promptData.maxInputLength}
                 onChange={(evt) => {
                   this.captions[idx] = evt.target.value.toUpperCase();
                   this.redrawCanvas();

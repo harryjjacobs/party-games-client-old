@@ -8,6 +8,8 @@ import ButtonPrompt, { INPUT_TYPE_BUTTON } from "./prompts/ButtonPrompt"
 
 import './App.css';
 
+const MAX_USERNAME_LENGTH = 15
+
 class App extends React.Component {
 
   constructor(props) {
@@ -60,7 +62,10 @@ class App extends React.Component {
     return (
       <TextPrompt className="App-join-prompt"
         promptData={
-          { prompts: ["ROOM CODE", "USERNAME"] }
+          {
+            prompts: ["ROOM CODE", "USERNAME"],
+            maxInputLength: MAX_USERNAME_LENGTH
+          }
         }
         onSubmit={
           (response) => this.sendJoinRequest(response.values[0], response.values[1])
