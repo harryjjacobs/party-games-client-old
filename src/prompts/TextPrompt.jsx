@@ -34,7 +34,7 @@ export default class TextPrompt extends React.Component {
         <input className="App-text-input TextPrompt-input TextPrompt-prompt"
           name={`textinput_${index}`} id={`textinput_${index}`} type="text"
           value={this.state.value}
-          maxlength={maxLength}
+          maxLength={maxLength}
           onChange={(event) => this.handleInputChange(index, event.target.value.toUpperCase())}
         />
       </div>
