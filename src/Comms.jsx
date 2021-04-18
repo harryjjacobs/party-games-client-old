@@ -18,6 +18,9 @@ const ServerMessageNames = {
 
 const CONNECTION_RETRY_INTERVAL = 2000; // milliseconds
 
+const PRODUCTION = process.env.NODE_ENV === 'production';
+const ENDPOINT = PRODUCTION ? 'ws://party-games-310323.ew.r.appspot.com/players' : 'ws://localhost:3000/players';
+
 class Comms extends React.Component {
   constructor(props) {
     super(props);
@@ -36,7 +39,7 @@ class Comms extends React.Component {
 
   connect() {
     console.log('attempting to connect...');
-    this.socket = new WebSocket('ws://localhost:3000/players');
+    this.socket = new WebSocket(ENDPOINT);
     this.socket.onopen = () => this.handleOpen();
     this.socket.onclose = () => this.handleClose();
     this.socket.onerror = (error) => this.handleError(error);
