@@ -1,16 +1,22 @@
 import React from 'react';
+import WebFont from 'webfontloader';
 import '../App.css'
 import './MemePrompt.css';
 
 export const INPUT_TYPE_MEME = "meme";
 
-class MemePrompt extends React.Component {
+WebFont.load({
+  google: {
+    families: ['Montserrat:900']
+  }
+});
 
+class MemePrompt extends React.Component {
   constructor(props) {
     super(props);
     this.canvasRef = React.createRef();
     this.imageRef = React.createRef();
-    this.captions = Array(props.promptData.template.captions.length).fill("<Insert Caption Here>");
+    this.captions = props.promptData.template.captions.map(caption_info => caption_info.text || '');
   }
 
   componentDidMount() {
