@@ -41,7 +41,6 @@
   border-radius: 0.2em;
   border: none;
   padding: 1em;
-  width: 20em;
   height: 15px;
   font-size: calc(10px + 2vmin);
   text-transform: uppercase;
@@ -80,18 +79,31 @@
   display: none;
 }
 
-.TextPrompt-container {
+.Prompt-container {
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
   font-size: calc(10px + 2vmin);
+  transform: translateY(-10vh);
 }
 
-.TextPrompt-input {
-  padding: 1em;
-  margin: 1em;
-  width: 60vw;
+.TextPrompt-container {
+  display: flex;
+  flex-flow: column nowrap;
+  align-items: center;
+}
+
+.TextPrompt-field {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  width: 90vw;
+  align-items: stretch;
+}
+
+.TextPrompt-field > * {
+  flex: 1;
 }
 
 .TextPrompt-submit {
@@ -104,6 +116,27 @@
   font-size: calc(10px + 4vmin);
   margin: 0px;
   padding: 1vmin;
+  flex: 3;
+}
+
+.TextPrompt-input {
+  padding: 1em;
+  margin: 1em;
+  flex: 4;
+}
+
+/* responsive TextPrompt form: move label inline for large screens */
+@media screen and (min-width: 800px) {
+  .TextPrompt-field {
+    flex-direction: row;
+    align-items: center;
+    align-content: space-between;
+  }
+  
+  .TextPrompt-label {
+    order: -1;
+    text-align: start;
+  }
 }
 
 .MultiChoicePrompt-label {
@@ -113,11 +146,6 @@
 }
 
 .MultiChoicePrompt-container {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  font-size: calc(10px + 3.5vmin);
   list-style-type: none;
   padding: 1vw;
 }
