@@ -1,22 +1,17 @@
-import React from 'react';
-import WebFont from 'webfontloader';
-import '../App.css'
-import './MemePrompt.css';
-
-export const INPUT_TYPE_MEME = "meme";
+import React from "react";
+import WebFont from "webfontloader";
 
 WebFont.load({
   google: {
-    families: ['Montserrat:900']
-  }
+    families: ["Montserrat:900"],
+  },
 });
 
-class MemePrompt extends React.Component {
+class MemeRenderer extends React.Component {
   constructor(props) {
     super(props);
     this.canvasRef = React.createRef();
     this.imageRef = React.createRef();
-    this.captions = props.promptData.template.captions.map(caption_info => caption_info.text || '');
   }
 
   componentDidMount() {
@@ -24,49 +19,57 @@ class MemePrompt extends React.Component {
     this.ctx = canvas.getContext("2d");
     this.img = this.imageRef.current;
     this.img.onload = () => {
-      //console.log("Image loaded");
       this.getOriginalImageSize(this.img, (size) => {
         this.unscaledImageSize = size;
         this.resizeCanvas();
         this.redrawCanvas();
         // resize the canvas to fill browser window dynamically
-        window.addEventListener('resize', () => {
-          this.resizeCanvas();
-          this.redrawCanvas();
-        }, false);
+        window.addEventListener(
+          "resize",
+          () => {
+            this.resizeCanvas();
+            this.redrawCanvas();
+          },
+          false
+        );
       });
-    }
+    };
   }
 
-  handleSubmit() {
-    if ((typeof this.props.onSubmit) === 'function') {
-      this.props.onSubmit({
-        captions: this.captions,
-        contestId: this.props.promptData.id
-      });
-    }
+  componentDidUpdate() {
+    this.redrawCanvas();
   }
 
   redrawCanvas() {
     this.ctx.clearRect(0, 0, this.ctx.canvas.width, this.ctx.canvas.height);
-    this.ctx.drawImage(this.img, 0, 0, this.ctx.canvas.width, this.ctx.canvas.height);
+    this.ctx.drawImage(
+      this.img,
+      0,
+      0,
+      this.ctx.canvas.width,
+      this.ctx.canvas.height
+    );
 
-    this.props.promptData.template.captions.forEach((info, i) => {
+    this.props.template.captions.forEach((info, i) => {
       var area = info.area;
       var text_color = this.rgba(
         info.text_color.r,
         info.text_color.g,
         info.text_color.b,
-        info.text_color.a)
+        info.text_color.a
+      );
       var background_color = this.rgba(
         info.background_color.r,
         info.background_color.g,
         info.background_color.b,
-        info.background_color.a);
+        info.background_color.a
+      );
       var rotation = info.rotation;
       var center_h = info.center_h;
       var center_v = info.center_v;
-      this.drawTextWithinRect(this.ctx, this.captions[i],
+      this.drawTextWithinRect(
+        this.ctx,
+        this.props.captions[i],
         area.x * this.imageScale,
         area.y * this.imageScale,
         area.width * this.imageScale,
@@ -87,13 +90,18 @@ class MemePrompt extends React.Component {
   }
 
   getOriginalImageSize(el, onReady) {
-    var src = typeof el.attr === 'function' ? el.attr('src') : el.src !== undefined ? el.src : el;
+    var src =
+      typeof el.attr === "function"
+        ? el.attr("src")
+        : el.src !== undefined
+        ? el.src
+        : el;
     var image = new Image();
     image.onload = function () {
-      if (typeof (onReady) == 'function') {
+      if (typeof onReady == "function") {
         onReady({
           width: image.width,
-          height: image.height
+          height: image.height,
         });
       }
     };
@@ -101,9 +109,9 @@ class MemePrompt extends React.Component {
   }
 
   resizeCanvas() {
-    // Make it visually fill the positioned parent
-    this.ctx.canvas.style.width = '100%';
-    this.ctx.canvas.style.height = '100%';
+    // Make it visually fill the positioned parent...
+    this.ctx.canvas.style.width = "100%";
+    this.ctx.canvas.style.height = "100%";
     // ...then set the internal size to match
     this.ctx.canvas.width = this.ctx.canvas.offsetWidth;
     this.ctx.canvas.height = this.ctx.canvas.offsetHeight;
@@ -113,30 +121,41 @@ class MemePrompt extends React.Component {
     }
   }
 
-  drawTextWithinRect(ctx, text, x, y, w, h, rotation, text_color, background_color, center_h, center_v) {
+  drawTextWithinRect(
+    ctx,
+    text,
+    x,
+    y,
+    w,
+    h,
+    rotation,
+    text_color,
+    background_color,
+    center_h,
+    center_v
+  ) {
     ctx.save();
     ctx.translate(x, y);
     ctx.rotate(rotation * (Math.PI / 180));
     this.ctx.fillStyle = background_color;
     this.ctx.fillRect(0, 0, w, h);
-    this.ctx.fillStyle = text_color;
-    var fontSize = 180;  // Set to something very large initially and then scale down until it fits
+    var fontSize = 180; // Set to something very large initially and then scale down until it fits
     var width = w;
-    var lineTest = '';
-    var words = text.split(' ');
+    var lineTest = "";
+    var words = text.split(" ");
     var fits = false;
     while (!fits) {
       var lines = [];
-      var line = '';
+      var line = "";
       var currentY = 0;
       var maxX = 0;
       ctx.font = `bold ${fontSize}px Montserrat`;
       if (center_h) {
         ctx.textAlign = "center";
       }
-      ctx.textBaseline = 'top';
+      ctx.textBaseline = "top";
       for (let i = 0, len = words.length; i < len; i++) {
-        lineTest = line + words[i] + ' ';
+        lineTest = line + words[i] + " ";
         // Check total width of line or last word
         if (ctx.measureText(lineTest).width > width) {
           currentY = lines.length * fontSize;
@@ -144,11 +163,11 @@ class MemePrompt extends React.Component {
           lines.push({ text: line, height: currentY });
           // Calculate the new height
           currentY += fontSize;
-          line = words[i] + ' ';
+          line = words[i] + " ";
           // Record how wide this line is
           let currentWidth = ctx.measureText(line).width; // Measure the width of the current line
           if (currentWidth > maxX) {
-            maxX = currentWidth;    // Update maximum x position with new width
+            maxX = currentWidth; // Update maximum x position with new width
           }
         } else {
           line = lineTest;
@@ -162,11 +181,11 @@ class MemePrompt extends React.Component {
         // Record how wide this line is
         let currentWidth = ctx.measureText(line).width; // Measure the width of the current line
         if (currentWidth > maxX) {
-          maxX = currentWidth;    // Update maximum x position with new width
+          maxX = currentWidth; // Update maximum x position with new width
         }
       }
       // Check whether the text fits in the y dimension of the rect
-      fits = (currentY <= h) && (maxX <= width);
+      fits = currentY <= h && maxX <= width;
       fontSize -= 5;
     }
     var originX = 0;
@@ -179,6 +198,8 @@ class MemePrompt extends React.Component {
       originY = (h - totalLineHeight) / 2;
     }
     // Draw text on canvas
+    console.log(text_color);
+    this.ctx.fillStyle = text_color;
     for (let i = 0, len = lines.length; i < len; i++) {
       ctx.fillText(lines[i].text, originX, originY + lines[i].height);
     }
@@ -186,43 +207,35 @@ class MemePrompt extends React.Component {
   }
 
   rgba(r, g, b, a) {
-    return ["rgba(", r, ",", g, ",", b, ",", a, ")"].join("");
+    return [
+      "rgba(",
+      Math.round(r * 255),
+      ",",
+      Math.round(g * 255),
+      ",",
+      Math.round(b * 255),
+      ",",
+      Math.round(a * 255),
+      ")",
+    ].join("");
   }
 
   render() {
     return (
-      <div className="MemePrompt-container">
-        <div id="canvasContainer" className="MemePrompt-canvas-container">
+      <div className="MemePrompt-renderer">
+        <div className="MemeRenderer-canvas-container">
           <canvas ref={this.canvasRef} />
         </div>
-        <div style={{ fontFamily: "Montserrat", opacity: 0 }} >.</div> {/* force font to load */}
-        <img ref={this.imageRef}
+        <img
+          ref={this.imageRef}
           alt="meme template"
           className="hidden"
-          src={"data:image/png;base64, " + this.props.promptData.template.image}
-          onLoad={this.initCanvas} />
-        <ul className="MemePrompt-captions-container"> {
-          this.props.promptData.template.captions.map((item, i) => {
-            var idx = i;
-            return <li key={i} className="MemePrompt-item">
-              <label className="MemePrompt-label"
-                htmlFor="textinput">{"Caption " + (i + 1) + ":"}</label>
-              <input className="App-text-input MemePrompt-input MemePrompt-prompt"
-                name="textinput" id={"textinput" + i} type="text"
-                maxLength={this.props.promptData.maxInputLength}
-                onChange={(evt) => {
-                  this.captions[idx] = evt.target.value.toUpperCase();
-                  this.redrawCanvas();
-                }} />
-            </li>
-          })
-        } </ul>
-
-        <button className="MemePrompt-input MemePrompt-submit App-button"
-          onClick={() => this.handleSubmit()}>SUBMIT</button>
-      </div >
+          src={"data:image/png;base64, " + this.props.template.image}
+          onLoad={this.initCanvas}
+        />
+      </div>
     );
   }
 }
 
-export default MemePrompt;
+export default MemeRenderer;
