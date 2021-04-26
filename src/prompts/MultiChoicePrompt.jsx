@@ -1,9 +1,8 @@
-import React from 'react';
+import React from "react";
 
 export const INPUT_TYPE_MULTI_CHOICE = "multichoice";
 
 class MultiChoicePrompt extends React.Component {
-
   constructor(props) {
     super(props);
 
@@ -11,10 +10,10 @@ class MultiChoicePrompt extends React.Component {
   }
 
   handleChoiceClick(choice) {
-    if (typeof (this.props.onSubmit) === 'function') {
+    if (typeof this.props.onSubmit === "function") {
       this.props.onSubmit({
         contestId: this.props.promptData.contestId,
-        choice: choice
+        choice: choice,
       });
     }
   }
@@ -26,10 +25,16 @@ class MultiChoicePrompt extends React.Component {
           {this.props.promptData.prompt}
         </span>
         {this.props.promptData.options.map((item, i) => {
-          return <li key={i} className="MultiChoicePrompt-item">
-            <button className="App-button"
-              onClick={() => this.handleChoiceClick(i)} >{item}</button>
-          </li>
+          return (
+            <li key={i} className="MultiChoicePrompt-item">
+              <button
+                className="App-button"
+                onClick={() => this.handleChoiceClick(i)}
+              >
+                {item}
+              </button>
+            </li>
+          );
         })}
       </ul>
     );

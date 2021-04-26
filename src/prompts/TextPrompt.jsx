@@ -1,10 +1,9 @@
-import React from 'react';
-import update from 'immutability-helper';
+import React from "react";
+import update from "immutability-helper";
 
-export const INPUT_TYPE_TEXT = 'text';
+export const INPUT_TYPE_TEXT = "text";
 
 export default class TextPrompt extends React.Component {
-
   constructor(props) {
     super(props);
     this.state = { values: new Array(this.props.promptData.prompts.length) };
@@ -14,14 +13,16 @@ export default class TextPrompt extends React.Component {
   }
 
   handleInputChange(index, value) {
-    this.setState({ values: update(this.state.values, { [index]: { $set: value } }) });
+    this.setState({
+      values: update(this.state.values, { [index]: { $set: value } }),
+    });
   }
 
   handleSubmitClick() {
-    if (typeof (this.props.onSubmit) === 'function') {
+    if (typeof this.props.onSubmit === "function") {
       this.props.onSubmit({
         values: this.state.values,
-        id: this.props.promptData.id
+        id: this.props.promptData.id,
       });
     }
   }
@@ -29,26 +30,40 @@ export default class TextPrompt extends React.Component {
   renderInputField = (index, prompt, maxLength) => {
     return (
       <div className="TextPrompt-field" key={index}>
-        <label className="TextPrompt-label"
-          htmlFor={`textinput_${index}`}>{prompt}</label>
-        <input className="App-text-input TextPrompt-input"
-          name={`textinput_${index}`} id={`textinput_${index}`} type="text"
+        <label className="TextPrompt-label" htmlFor={`textinput_${index}`}>
+          {prompt}
+        </label>
+        <input
+          className="App-text-input TextPrompt-input"
+          name={`textinput_${index}`}
+          id={`textinput_${index}`}
+          type="text"
           value={this.state.value}
           maxLength={maxLength}
-          onChange={(event) => this.handleInputChange(index, event.target.value.toUpperCase())}
+          onChange={(event) =>
+            this.handleInputChange(index, event.target.value.toUpperCase())
+          }
         />
       </div>
     );
-  }
+  };
 
   render() {
     return (
-      <div className="Prompt-container TextPrompt-container" >
-        {
-          this.props.promptData.prompts.map((prompt, index) => this.renderInputField(index, prompt, this.props.promptData.maxInputLength))
-        }
-        <button className="TextPrompt-submit App-button"
-          onClick={this.handleSubmitClick} >SUBMIT</button>
+      <div className="Prompt-container TextPrompt-container">
+        {this.props.promptData.prompts.map((prompt, index) =>
+          this.renderInputField(
+            index,
+            prompt,
+            this.props.promptData.maxInputLength
+          )
+        )}
+        <button
+          className="TextPrompt-submit App-button"
+          onClick={this.handleSubmitClick}
+        >
+          SUBMIT
+        </button>
       </div>
     );
   }

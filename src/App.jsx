@@ -1,17 +1,18 @@
-import React from 'react';
-import Comms from './Comms';
+import React from "react";
+import Comms from "./Comms";
 import ErrorMessage from "./ErrorMessage";
 import TextPrompt, { INPUT_TYPE_TEXT } from "./prompts/TextPrompt";
-import MultiChoicePrompt, { INPUT_TYPE_MULTI_CHOICE } from "./prompts/MultiChoicePrompt";
-import MemePrompt, { INPUT_TYPE_MEME } from "./prompts/MemePrompt"
-import ButtonPrompt, { INPUT_TYPE_BUTTON } from "./prompts/ButtonPrompt"
+import MultiChoicePrompt, {
+  INPUT_TYPE_MULTI_CHOICE,
+} from "./prompts/MultiChoicePrompt";
+import MemePrompt, { INPUT_TYPE_MEME } from "./prompts/meme/MemePrompt";
+import ButtonPrompt, { INPUT_TYPE_BUTTON } from "./prompts/ButtonPrompt";
 
-import './App.css';
+import "./App.css";
 
-const MAX_USERNAME_LENGTH = 15
+const MAX_USERNAME_LENGTH = 15;
 
 class App extends React.Component {
-
   constructor(props) {
     super(props);
 
@@ -29,11 +30,11 @@ class App extends React.Component {
 
   sendPromptResponse = (responseData) => {
     this.commsRef.current.sendPromptResponse(responseData);
-  }
+  };
 
   sendJoinRequest = (roomCode, username) => {
     this.commsRef.current.requestJoin(roomCode, username);
-  }
+  };
 
   renderInputPrompt = () => {
     console.log(this.state.messageData);
@@ -48,31 +49,35 @@ class App extends React.Component {
     } else if (promptType === INPUT_TYPE_TEXT) {
       Prompt = TextPrompt;
     } else {
-      console.warn("[renderInputPrompt] promptType " + promptType + " invalid.");
+      console.warn(
+        "[renderInputPrompt] promptType " + promptType + " invalid."
+      );
       return null;
     }
 
-    return <Prompt className="App-question-prompt"
-      promptData={this.state.messageData.promptData}
-      onSubmit={data => this.sendPromptResponse(data)}
-    />
-  }
+    return (
+      <Prompt
+        className="App-question-prompt"
+        promptData={this.state.messageData.promptData}
+        onSubmit={(data) => this.sendPromptResponse(data)}
+      />
+    );
+  };
 
   renderJoinInput = () => {
     return (
-      <TextPrompt className="App-join-prompt"
-        promptData={
-          {
-            prompts: ["ROOM CODE", "USERNAME"],
-            maxInputLength: MAX_USERNAME_LENGTH
-          }
-        }
-        onSubmit={
-          (response) => this.sendJoinRequest(response.values[0], response.values[1])
+      <TextPrompt
+        className="App-join-prompt"
+        promptData={{
+          prompts: ["ROOM CODE", "USERNAME"],
+          maxInputLength: MAX_USERNAME_LENGTH,
+        }}
+        onSubmit={(response) =>
+          this.sendJoinRequest(response.values[0], response.values[1])
         }
       />
     );
-  }
+  };
 
   renderBody = () => {
     if (this.state.joined) {
@@ -83,38 +88,34 @@ class App extends React.Component {
       return this.renderJoinInput();
     }
     return null;
-  }
+  };
 
   render() {
     return (
-      <div className="App" >
-        <header className="App-header" >
-          Party Games
-          </header>
+      <div className="App">
+        <header className="App-header">Party Games</header>
         <div className="App-body">
-          <Comms socketUrl={this.props.socketUrl}
+          <Comms
+            socketUrl={this.props.socketUrl}
             ref={this.commsRef}
-            onJoinStateChanged={
-              (state) => this.setState({ joined: state })
+            onJoinStateChanged={(state) => this.setState({ joined: state })}
+            onShowInputPrompt={(data) =>
+              this.setState({ showPrompt: true, messageData: data })
             }
-            onShowInputPrompt={
-              (data) => this.setState({ showPrompt: true, messageData: data })
+            onHideInputPrompt={() => this.setState({ showPrompt: false })}
+            onError={(msg) =>
+              this.setState({ showError: true, errorText: msg })
             }
-            onHideInputPrompt={
-              () => this.setState({ showPrompt: false })
-            }
-            onError={
-              (msg) => this.setState({ showError: true, errorText: msg })
-            } />
+          />
 
           {this.renderBody()}
 
-          <ErrorMessage show={this.state.showError}
+          <ErrorMessage
+            show={this.state.showError}
             timeout={2000}
             message={this.state.errorText}
-            onHide={
-              () => this.setState({ showError: false })
-            } />
+            onHide={() => this.setState({ showError: false })}
+          />
         </div>
       </div>
     );
