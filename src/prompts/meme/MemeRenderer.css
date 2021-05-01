@@ -1,5 +1,6 @@
 .MemeRenderer-canvas-container {
-  width: 80%;
   height: auto;
-  padding: 1em;
+  margin: auto;
+  padding: em;
+  text-align: left;
 }

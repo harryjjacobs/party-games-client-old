@@ -1,238 +1,150 @@
 import React from "react";
 import WebFont from "webfontloader";
+import textFit from "./textFit";
+
+import "./MemeRenderer.css";
 
 WebFont.load({
   google: {
-    families: ["Montserrat:900"],
+    families: ["Montserrat:400,800"],
   },
 });
+
+const CAPTION_TEXT_PADDING = 10; // px
 
 class MemeRenderer extends React.Component {
   constructor(props) {
     super(props);
-    this.canvasRef = React.createRef();
-    this.imageRef = React.createRef();
-  }
-
-  componentDidMount() {
-    var canvas = this.canvasRef.current;
-    this.ctx = canvas.getContext("2d");
-    this.img = this.imageRef.current;
-    this.img.onload = () => {
-      this.getOriginalImageSize(this.img, (size) => {
-        this.unscaledImageSize = size;
-        this.resizeCanvas();
-        this.redrawCanvas();
-        // resize the canvas to fill browser window dynamically
-        window.addEventListener(
-          "resize",
-          () => {
-            this.resizeCanvas();
-            this.redrawCanvas();
-          },
-          false
-        );
-      });
+    this.state = {
+      imageSize: { width: 500, height: 300 },
     };
   }
 
-  componentDidUpdate() {
-    this.redrawCanvas();
+  initialize() {
+    this.imageData = "data:image/png;base64, " + this.props.template.image;
+    this.initializeSvgSize();
   }
 
-  redrawCanvas() {
-    this.ctx.clearRect(0, 0, this.ctx.canvas.width, this.ctx.canvas.height);
-    this.ctx.drawImage(
-      this.img,
-      0,
-      0,
-      this.ctx.canvas.width,
-      this.ctx.canvas.height
-    );
+  initializeSvgSize() {
+    var image = new Image();
+    image.onload = () => {
+      this.setState({
+        imageSize: { width: image.naturalWidth, height: image.naturalHeight },
+      });
+    };
+    image.src = this.imageData;
+  }
 
-    this.props.template.captions.forEach((info, i) => {
-      var area = info.area;
-      var text_color = this.rgba(
-        info.text_color.r,
-        info.text_color.g,
-        info.text_color.b,
-        info.text_color.a
-      );
-      var background_color = this.rgba(
-        info.background_color.r,
-        info.background_color.g,
-        info.background_color.b,
-        info.background_color.a
-      );
-      var rotation = info.rotation;
-      var center_h = info.center_h;
-      var center_v = info.center_v;
-      this.drawTextWithinRect(
-        this.ctx,
-        this.props.captions[i],
-        area.x * this.imageScale,
-        area.y * this.imageScale,
-        area.width * this.imageScale,
-        area.height * this.imageScale,
-        rotation,
-        text_color,
-        background_color,
-        center_h,
-        center_v
-      );
-      // For debugging:
-      // console.log(this.ctx.canvas.width);
-      // console.log(this.imageScale);
-      // console.log(area.x * this.imageScale);
-      //this.ctx.fillRect(0, 0, this.ctx.canvas.width, this.ctx.canvas.width);
-      //this.ctx.fillRect(area.x * this.imageScale, area.y * this.imageScale, area.width * this.imageScale, area.height * this.imageScale);
+  applyTextFit() {
+    this.props.template.captions.forEach((captionTemplate, i) => {
+      var hAlign = captionTemplate.center_h;
+      var vAlign = captionTemplate.center_v;
+      var maxFontSize = 100;
+      var minFontSize = 6;
+      if (captionTemplate.font_size) {
+        maxFontSize = captionTemplate.font_size;
+      }
+      textFit(document.getElementById(this.captionTextId(i)), {
+        multiLine: true,
+        reProcess: true,
+        alignHoriz: hAlign,
+        alignVert: vAlign,
+        maxFontSize: maxFontSize,
+        minFontSize: minFontSize,
+      });
     });
   }
 
-  getOriginalImageSize(el, onReady) {
-    var src =
-      typeof el.attr === "function"
-        ? el.attr("src")
-        : el.src !== undefined
-        ? el.src
-        : el;
-    var image = new Image();
-    image.onload = function () {
-      if (typeof onReady == "function") {
-        onReady({
-          width: image.width,
-          height: image.height,
-        });
-      }
-    };
-    image.src = src;
-  }
-
-  resizeCanvas() {
-    // Make it visually fill the positioned parent...
-    this.ctx.canvas.style.width = "100%";
-    this.ctx.canvas.style.height = "100%";
-    // ...then set the internal size to match
-    this.ctx.canvas.width = this.ctx.canvas.offsetWidth;
-    this.ctx.canvas.height = this.ctx.canvas.offsetHeight;
-    if (this.unscaledImageSize) {
-      this.imageScale = this.ctx.canvas.width / this.unscaledImageSize.width;
-      this.ctx.canvas.height = this.unscaledImageSize.height * this.imageScale;
-    }
-  }
-
-  drawTextWithinRect(
-    ctx,
-    text,
-    x,
-    y,
-    w,
-    h,
-    rotation,
-    text_color,
-    background_color,
-    center_h,
-    center_v
-  ) {
-    ctx.save();
-    ctx.translate(x, y);
-    ctx.rotate(rotation * (Math.PI / 180));
-    this.ctx.fillStyle = background_color;
-    this.ctx.fillRect(0, 0, w, h);
-    var fontSize = 180; // Set to something very large initially and then scale down until it fits
-    var width = w;
-    var lineTest = "";
-    var words = text.split(" ");
-    var fits = false;
-    while (!fits) {
-      var lines = [];
-      var line = "";
-      var currentY = 0;
-      var maxX = 0;
-      ctx.font = `bold ${fontSize}px Montserrat`;
-      if (center_h) {
-        ctx.textAlign = "center";
-      }
-      ctx.textBaseline = "top";
-      for (let i = 0, len = words.length; i < len; i++) {
-        lineTest = line + words[i] + " ";
-        // Check total width of line or last word
-        if (ctx.measureText(lineTest).width > width) {
-          currentY = lines.length * fontSize;
-          // Record and reset the current line
-          lines.push({ text: line, height: currentY });
-          // Calculate the new height
-          currentY += fontSize;
-          line = words[i] + " ";
-          // Record how wide this line is
-          let currentWidth = ctx.measureText(line).width; // Measure the width of the current line
-          if (currentWidth > maxX) {
-            maxX = currentWidth; // Update maximum x position with new width
-          }
-        } else {
-          line = lineTest;
-        }
-      }
-      // Catch last line in-case something is left over
-      if (line.length > 0) {
-        currentY = lines.length * fontSize;
-        lines.push({ text: line.trim(), height: currentY });
-        currentY += fontSize;
-        // Record how wide this line is
-        let currentWidth = ctx.measureText(line).width; // Measure the width of the current line
-        if (currentWidth > maxX) {
-          maxX = currentWidth; // Update maximum x position with new width
-        }
-      }
-      // Check whether the text fits in the y dimension of the rect
-      fits = currentY <= h && maxX <= width;
-      fontSize -= 5;
-    }
-    var originX = 0;
-    var originY = 0;
-    if (center_h) {
-      var totalLineHeight = fontSize * lines.length;
-      originX = w / 2;
-    }
-    if (center_v) {
-      originY = (h - totalLineHeight) / 2;
-    }
-    // Draw text on canvas
-    console.log(text_color);
-    this.ctx.fillStyle = text_color;
-    for (let i = 0, len = lines.length; i < len; i++) {
-      ctx.fillText(lines[i].text, originX, originY + lines[i].height);
-    }
-    ctx.restore();
-  }
-
-  rgba(r, g, b, a) {
+  rgba(rgba) {
     return [
       "rgba(",
-      Math.round(r * 255),
+      Math.round(rgba.r * 255),
       ",",
-      Math.round(g * 255),
+      Math.round(rgba.g * 255),
       ",",
-      Math.round(b * 255),
+      Math.round(rgba.b * 255),
       ",",
-      Math.round(a * 255),
+      Math.round(rgba.a * 255),
       ")",
     ].join("");
+  }
+
+  captionTextId(key) {
+    return `MemeRenderer-caption-text_${key}`;
+  }
+
+  componentDidMount() {
+    this.initialize();
+  }
+
+  componentDidUpdate(prevProps) {
+    if (prevProps.template !== this.props.template) {
+      this.initialize();
+    }
+    this.applyTextFit();
+  }
+
+  renderCaption(key, captionTemplate, captionText) {
+    return (
+      <foreignObject
+        key={key}
+        x={captionTemplate.area.x}
+        y={captionTemplate.area.y}
+        width={captionTemplate.area.width}
+        height={captionTemplate.area.height}
+        transform={`rotate(${captionTemplate.rotation} ${captionTemplate.area.x} ${captionTemplate.area.y})`}
+      >
+        <div
+          className="MemeRenderer-caption"
+          style={{
+            width: captionTemplate.area.width,
+            height: captionTemplate.area.height,
+            backgroundColor: this.rgba(captionTemplate.background_color),
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+          }}
+        >
+          <div
+            xmlns="http://www.w3.org/1999/xhtml"
+            style={{
+              height: `calc(100% - ${CAPTION_TEXT_PADDING}px)`,
+              width: `calc(100% - ${CAPTION_TEXT_PADDING}px)`,
+              fontFamily: captionTemplate.font_family || "Montserrat",
+              fontWeight: "bolder",
+              color: this.rgba(captionTemplate.text_color),
+            }}
+            id={this.captionTextId(key)}
+          >
+            {captionText}
+          </div>
+        </div>
+      </foreignObject>
+    );
   }
 
   render() {
     return (
       <div className="MemePrompt-renderer">
         <div className="MemeRenderer-canvas-container">
-          <canvas ref={this.canvasRef} />
+          <svg
+            className="MemeRenderer-svg"
+            height="100%"
+            width="100%"
+            viewBox={`0 0 ${this.state.imageSize.width} ${this.state.imageSize.height}`}
+            xmlns="http://www.w3.org/2000/svg"
+          >
+            <image
+              width="100%"
+              height="100%"
+              preserveAspectRatio="xMidYMid meet"
+              href={this.imageData}
+            ></image>
+            {this.props.template.captions.map((e, i) =>
+              this.renderCaption(i, e, this.props.captions[i])
+            )}
+          </svg>
         </div>
-        <img
-          ref={this.imageRef}
-          alt="meme template"
-          className="hidden"
-          src={"data:image/png;base64, " + this.props.template.image}
-          onLoad={this.initCanvas}
-        />
       </div>
     );
   }
