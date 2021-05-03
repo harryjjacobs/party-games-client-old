@@ -1,34 +1,33 @@
 import React from "react";
 import ReactDOM from "react-dom";
 import { BrowserRouter as Router, Route, Switch } from "react-router-dom";
-import * as serviceWorker from "./serviceWorker";
 import "./index.css";
 import App from "./App";
-import MemePromptStandalone from "./prompts/meme/MemePromptStandalone";
+
+function memePromptStandalone() {
+  let PRODUCTION = process.env.NODE_ENV === "production";
+  if (!PRODUCTION) {
+    const MemePromptStandalone = require("./prompts/meme/MemePromptStandalone")
+      .default;
+    return (
+      <Route exact path="/memes/test">
+        <MemePromptStandalone />
+      </Route>
+    );
+  }
+  return null;
+}
 
 ReactDOM.render(
   <Router>
     <div>
       <Switch>
         <Route exact path="/">
-          404 - Page not found
+          <App />
         </Route>
-        <Route exact path="/memes">
-          <App socketUrl="ws://localhost:80/memes" />
-        </Route>
-        <Route exact path="/memes/test">
-          <MemePromptStandalone />
-        </Route>
-        <Route exact path="/quiz">
-          <App socketUrl="ws://localhost:80/quiz" />
-        </Route>
+        {memePromptStandalone()}
       </Switch>
     </div>
   </Router>,
   document.getElementById("root")
 );
-
-// If you want your app to work offline and load faster, you can change
-// unregister() to register() below. Note this comes with some pitfalls.
-// Learn more about service workers: https://bit.ly/CRA-PWA
-serviceWorker.unregister();
