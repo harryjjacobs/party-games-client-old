@@ -20,7 +20,7 @@ const CONNECTION_RETRY_INTERVAL = 2000; // milliseconds
 
 const PRODUCTION = process.env.NODE_ENV === "production";
 const ENDPOINT = PRODUCTION
-  ? "ws://party-games-310323.ew.r.appspot.com/players"
+  ? "wss://party-games-310323.ew.r.appspot.com/players"
   : "ws://localhost:8080/players";
 
 class Comms extends React.Component {
