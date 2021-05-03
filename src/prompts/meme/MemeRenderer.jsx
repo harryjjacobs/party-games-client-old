@@ -20,6 +20,17 @@ class MemeRenderer extends React.Component {
     };
   }
 
+  componentDidMount() {
+    this.initialize();
+  }
+
+  componentDidUpdate(prevProps) {
+    if (prevProps.template !== this.props.template) {
+      this.initialize();
+    }
+    this.applyTextFit();
+  }
+
   initialize() {
     this.imageData = "data:image/png;base64, " + this.props.template.image;
     this.initializeSvgSize();
@@ -73,15 +84,17 @@ class MemeRenderer extends React.Component {
     return `MemeRenderer-caption-text_${key}`;
   }
 
-  componentDidMount() {
-    this.initialize();
-  }
-
-  componentDidUpdate(prevProps) {
-    if (prevProps.template !== this.props.template) {
-      this.initialize();
+  captionOutlineStyle(captionTemplate) {
+    if (
+      captionTemplate.outline_text &&
+      captionTemplate.text_outline_color &&
+      captionTemplate.text_outline_size
+    ) {
+      return `${captionTemplate.text_outline_size}px ${this.rgba(
+        captionTemplate.text_outline_color
+      )}`;
     }
-    this.applyTextFit();
+    return undefined;
   }
 
   renderCaption(key, captionTemplate, captionText) {
@@ -113,6 +126,7 @@ class MemeRenderer extends React.Component {
               fontFamily: captionTemplate.font_family || "Montserrat",
               fontWeight: "bolder",
               color: this.rgba(captionTemplate.text_color),
+              WebkitTextStroke: this.captionOutlineStyle(captionTemplate),
             }}
             id={this.captionTextId(key)}
           >
