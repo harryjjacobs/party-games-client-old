@@ -96,7 +96,6 @@ class App extends React.Component {
         <header className="App-header">Party Games</header>
         <div className="App-body">
           <Comms
-            socketUrl={this.props.socketUrl}
             ref={this.commsRef}
             onJoinStateChanged={(state) => this.setState({ joined: state })}
             onShowInputPrompt={(data) =>
