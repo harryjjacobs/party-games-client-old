@@ -1,0 +1,14 @@
+#!/bin/sh
+npm run-script build
+
+gcloud app deploy --promote
+
+versions=$(gcloud app versions list \
+  --service front-end \
+  --sort-by '~VERSION.ID' \
+  --format 'value(VERSION.ID)' | sed 1,1d)  # sed 1,5d to keep the last 5
+for version in $versions; do
+  gcloud app versions delete "$version" \
+    --service front-end \
+    --quiet
+done
