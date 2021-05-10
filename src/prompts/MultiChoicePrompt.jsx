@@ -31,7 +31,7 @@ class MultiChoicePrompt extends React.Component {
                 className="App-button"
                 onClick={() => this.handleChoiceClick(i)}
               >
-                {item}
+                <pre>{item}</pre>
               </button>
             </li>
           );
