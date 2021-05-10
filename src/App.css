@@ -1,5 +1,6 @@
 .App {
   text-align: center;
+  font-family: "Montserrat", sans-serif;
 }
 
 .App-logo {
@@ -9,7 +10,7 @@
 }
 
 .App-header {
-  background-color: #1d2938;
+  background-color: #375273;
   min-height: 10vh;
   display: flex;
   flex-direction: column;
@@ -25,7 +26,6 @@
   display: flex;
   flex-direction: column;
   align-items: center;
-  justify-content: center;
   color: white;
 }
 
@@ -54,9 +54,8 @@
   box-sizing: border-box;
   border: none;
   text-decoration: none;
-  font-family: "Roboto", sans-serif;
   font-size: calc(10px + 2vmin);
-  font-weight: 300;
+  font-weight: 500;
   color: #ffffff;
   background-color: #4eb5f1;
   text-align: center;
@@ -68,7 +67,7 @@
   background-color: #4095c6;
 }
 
-@media all and (max-width: 30em) {
+@media all and (max-width: 20em) {
   .App-button {
     display: block;
     margin: 0.2em auto;
@@ -85,7 +84,7 @@
   align-items: center;
   justify-content: center;
   font-size: calc(10px + 2vmin);
-  transform: translateY(-10vh);
+  margin-top: 5vh;
 }
 
 .TextPrompt-container {
@@ -126,7 +125,7 @@
 }
 
 /* responsive TextPrompt form: move label inline for large screens */
-@media screen and (min-width: 800px) {
+@media screen and (min-width: 1300px) {
   .TextPrompt-field {
     flex-direction: row;
     align-items: center;
