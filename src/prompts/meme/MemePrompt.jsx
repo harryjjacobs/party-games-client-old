@@ -10,10 +10,24 @@ class MemePrompt extends React.Component {
   constructor(props) {
     super(props);
     this.state = {
-      captions: props.promptData.template.captions.map(
-        (caption_info) => caption_info.text || ""
-      ),
+      captions: this.getInitialCaptionsText(),
     };
+  }
+
+  componentDidUpdate(prevProps) {
+    let oldTemplate = prevProps.promptData.template;
+    let newTemplate = this.props.promptData.template;
+    if (oldTemplate !== newTemplate) {
+      this.setState({
+        captions: this.getInitialCaptionsText(),
+      });
+    }
+  }
+
+  getInitialCaptionsText() {
+    return this.props.promptData.template.captions.map(
+      (caption_info) => caption_info.text || ""
+    );
   }
 
   handleSubmit() {
@@ -33,8 +47,7 @@ class MemePrompt extends React.Component {
           captions={this.state.captions}
         />
         <ul className="MemePrompt-captions-container">
-          {" "}
-          {this.props.promptData.template.captions.map((item, i) => {
+          {this.props.promptData.template.captions.map((_, i) => {
             var idx = i;
             return (
               <li key={i} className="MemePrompt-item">
@@ -47,6 +60,11 @@ class MemePrompt extends React.Component {
                   id={"textinput" + i}
                   type="text"
                   maxLength={this.props.promptData.maxInputLength}
+                  defaultValue={
+                    i < this.state.captions.length
+                      ? this.state.captions[idx]
+                      : ""
+                  }
                   onChange={(evt) => {
                     this.setState({
                       captions: update(this.state.captions, {
