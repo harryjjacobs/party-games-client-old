@@ -4,10 +4,12 @@
     {
       "area": { "x": 210, "y": 230, "width": 200, "height": 85 },
       "rotation": -7,
-      "text": "",
+      "text": "Initial Text",
       "text_color": { "r": 0, "g": 0, "b": 0, "a": 1 },
       "background_color": { "r": 1, "g": 1, "b": 1, "a": 0 },
-      "outline_text": false,
+      "outline_text": true,
+      "text_outline_size": 2,
+      "text_outline_color": { "r": 0.5, "g": 0.2, "b": 0.9, "a": 0.4 },
       "center_h": true,
       "center_v": true,
       "font_family": "Arial"
