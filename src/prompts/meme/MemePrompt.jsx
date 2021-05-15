@@ -26,7 +26,7 @@ class MemePrompt extends React.Component {
 
   getInitialCaptionsText() {
     return this.props.promptData.template.captions.map(
-      (caption_info) => caption_info.text || ""
+      (caption_info) => caption_info.text.toUpperCase() || ""
     );
   }
 
