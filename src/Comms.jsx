@@ -4,6 +4,7 @@ const ClientMessageNames = {
   MESSAGE_TYPE_PROMPT_RESPONSE: "prompt_response",
   MESSAGE_TYPE_REQUEST_JOIN: "request_join",
   MESSAGE_TYPE_REQUEST_REJOIN: "request_rejoin",
+  MESSAGE_TYPE_HEARTBEAT_PONG: "heartbeat_pong",
 };
 
 const ServerMessageNames = {
@@ -14,6 +15,7 @@ const ServerMessageNames = {
   MESSAGE_TYPE_REJECT_INPUT: "reject_input",
   MESSAGE_TYPE_REQUEST_INPUT: "request_input",
   MESSAGE_TYPE_HIDE_PROMPT: "hide_prompt",
+  MESSAGE_TYPE_HEARTBEAT_PING: "heartbeat_ping",
 };
 
 const CONNECTION_RETRY_INTERVAL = 2000; // milliseconds
@@ -75,21 +77,22 @@ class Comms extends React.Component {
     this.socket.close();
   }
 
-  sendMessage(messageType, roomCode, messageData) {
-    //message.time = Math.floor(Date.now() / 1000);
+  sendMessageToRoom(messageType, roomCode, messageData) {
     messageData.roomCode = roomCode;
+    this.sendMessage(messageType, messageData);
+  }
+
+  sendMessage(messageType, messageData) {
     const message = {
       type: messageType,
       data: messageData,
     };
     this.socket.send(JSON.stringify(message));
-    console.log(
-      `${messageType} sent to room ${roomCode}: ${JSON.stringify(message)}`
-    );
+    console.log(`message sent: ${JSON.stringify(message)}`);
   }
 
   sendPromptResponse(messageData) {
-    this.sendMessage(
+    this.sendMessageToRoom(
       ClientMessageNames.MESSAGE_TYPE_PROMPT_RESPONSE,
       this.state.roomCode,
       messageData
@@ -108,9 +111,13 @@ class Comms extends React.Component {
       });
       return;
     }
-    this.sendMessage(ClientMessageNames.MESSAGE_TYPE_REQUEST_JOIN, roomCode, {
-      username: username,
-    });
+    this.sendMessageToRoom(
+      ClientMessageNames.MESSAGE_TYPE_REQUEST_JOIN,
+      roomCode,
+      {
+        username: username,
+      }
+    );
     this.setState({
       error: false,
       errorText: "",
@@ -118,9 +125,13 @@ class Comms extends React.Component {
   }
 
   requestRejoin(roomCode, clientId) {
-    this.sendMessage(ClientMessageNames.MESSAGE_TYPE_REQUEST_REJOIN, roomCode, {
-      oldClientId: clientId,
-    });
+    this.sendMessageToRoom(
+      ClientMessageNames.MESSAGE_TYPE_REQUEST_REJOIN,
+      roomCode,
+      {
+        oldClientId: clientId,
+      }
+    );
     console.log(
       `Requesting to rejoin room ${roomCode} using stored clientId ${clientId} `
     );
@@ -136,6 +147,9 @@ class Comms extends React.Component {
       return;
     }
     switch (message.type) {
+      case ServerMessageNames.MESSAGE_TYPE_HEARTBEAT_PING:
+        this.handleHeartbeatPing();
+        break;
       case ServerMessageNames.MESSAGE_TYPE_ACCEPT_JOIN:
         if (!message.data.clientId || !message.data.roomCode) {
           console.debug(
@@ -234,7 +248,11 @@ class Comms extends React.Component {
     }
   }
 
-  componentDidUpdate(prevProps, prevState, snapshot) {
+  handleHeartbeatPing() {
+    this.sendMessage(ClientMessageNames.MESSAGE_TYPE_HEARTBEAT_PONG, {});
+  }
+
+  componentDidUpdate(_prevProps, prevState, _snapshot) {
     if (this.state.connected) {
       if (!prevState.connected && !this.state.joined) {
         this.props.onJoinStateChanged(this.state.joined);
