@@ -14,7 +14,7 @@ class ButtonPrompt extends React.Component {
 
   render() {
     return (
-      <div className="MultiChoicePrompt-container">
+      <div className="Prompt-container ButtonPrompt-container">
         <button className="App-button" onClick={() => this.handleButtonPress()}>
           <pre>{this.props.promptData.prompt}</pre>
         </button>

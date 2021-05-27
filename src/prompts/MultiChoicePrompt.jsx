@@ -20,7 +20,7 @@ class MultiChoicePrompt extends React.Component {
 
   render() {
     return (
-      <ul className="MultiChoicePrompt-container Prompt-container">
+      <ul className="Prompt-container MultiChoicePrompt-container">
         <span className="MultiChoicePrompt-label">
           {this.props.promptData.prompt}
         </span>
