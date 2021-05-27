@@ -97,8 +97,6 @@ class Comms extends React.Component {
       this.state.roomCode,
       messageData
     );
-    // Hide the prompt once we've sent a response
-    this.setState({ showPrompt: false });
     // Clear saved prompt
     sessionStorage.setItem("lastPrompt", "");
   }
@@ -147,10 +145,11 @@ class Comms extends React.Component {
       return;
     }
     switch (message.type) {
-      case ServerMessageNames.MESSAGE_TYPE_HEARTBEAT_PING:
+      case ServerMessageNames.MESSAGE_TYPE_HEARTBEAT_PING: {
         this.handleHeartbeatPing();
         break;
-      case ServerMessageNames.MESSAGE_TYPE_ACCEPT_JOIN:
+      }
+      case ServerMessageNames.MESSAGE_TYPE_ACCEPT_JOIN: {
         if (!message.data.clientId || !message.data.roomCode) {
           console.debug(
             `invalid ${ServerMessageNames.MESSAGE_TYPE_ACCEPT_JOIN} message`
@@ -168,7 +167,8 @@ class Comms extends React.Component {
         // Store the roomCode
         sessionStorage.setItem("roomCode", message.data.roomCode);
         break;
-      case ServerMessageNames.MESSAGE_TYPE_ACCEPT_REJOIN:
+      }
+      case ServerMessageNames.MESSAGE_TYPE_ACCEPT_REJOIN: {
         if (!message.data.clientId || !message.data.roomCode) {
           console.debug(
             `invalid ${ServerMessageNames.MESSAGE_TYPE_ACCEPT_REJOIN} message`
@@ -187,18 +187,17 @@ class Comms extends React.Component {
         sessionStorage.setItem("roomCode", message.data.roomCode);
         // Restore any unhandled prompts
         // TODO: store timestamp and don't restore very old data
-        try {
-          const lastPrompt = JSON.parse(sessionStorage.getItem("lastPrompt"));
-          if (lastPrompt) {
-            // Show prompt
-            this.setState({
-              showPrompt: true,
-              promptData: lastPrompt,
-            });
-          }
-        } catch {}
+        const lastPrompt = this.getLastPrompt();
+        if (lastPrompt) {
+          // Show prompt
+          this.setState({
+            showPrompt: true,
+            promptData: lastPrompt,
+          });
+        }
         break;
-      case ServerMessageNames.MESSAGE_TYPE_REJECT_JOIN:
+      }
+      case ServerMessageNames.MESSAGE_TYPE_REJECT_JOIN: {
         // Hide previous error
         this.setState({ error: false });
         // Show new error
@@ -214,7 +213,8 @@ class Comms extends React.Component {
         // Clear the roomCode, it's no longer valid
         sessionStorage.setItem("roomCode", "");
         break;
-      case ServerMessageNames.MESSAGE_TYPE_REJECT_REJOIN:
+      }
+      case ServerMessageNames.MESSAGE_TYPE_REJECT_REJOIN: {
         this.setState({ joined: false });
         // In the event of a disconnect, don't attempt to rejoin
         sessionStorage.setItem("rejoin", "false");
@@ -223,29 +223,48 @@ class Comms extends React.Component {
         // Clear the roomCode, it's no longer valid
         sessionStorage.setItem("roomCode", "");
         break;
-      case ServerMessageNames.MESSAGE_TYPE_REJECT_INPUT:
+      }
+      case ServerMessageNames.MESSAGE_TYPE_REJECT_INPUT: {
         this.setState({
           error: true,
           errorText: message.data.error,
         });
         break;
-      case ServerMessageNames.MESSAGE_TYPE_REQUEST_INPUT:
+      }
+      case ServerMessageNames.MESSAGE_TYPE_REQUEST_INPUT: {
         // Show prompt
         this.setState({
           showPrompt: true,
           promptData: message.data,
         });
-        sessionStorage.setItem("lastPrompt", JSON.stringify(message.data));
+        this.saveLastPrompt(message.data);
         break;
-      case ServerMessageNames.MESSAGE_TYPE_HIDE_PROMPT:
+      }
+      case ServerMessageNames.MESSAGE_TYPE_HIDE_PROMPT: {
         // Hide input display
         this.setState({ showPrompt: false });
-        sessionStorage.removeItem("lastPrompt");
+        this.clearLastPrompt();
         break;
+      }
       default:
         console.log(`message type ${message.type} not handled`);
         break;
     }
+  }
+
+  saveLastPrompt(data) {
+    sessionStorage.setItem("lastPrompt", JSON.stringify(data));
+  }
+
+  getLastPrompt() {
+    try {
+      return JSON.parse(sessionStorage.getItem("lastPrompt"));
+    } catch {}
+    return undefined;
+  }
+
+  clearLastPrompt() {
+    sessionStorage.removeItem("lastPrompt");
   }
 
   handleHeartbeatPing() {
@@ -262,7 +281,10 @@ class Comms extends React.Component {
         this.props.onJoinStateChanged(this.state.joined);
         this.props.onHideInputPrompt();
       }
-      if (this.state.showPrompt && !prevState.showPrompt) {
+      if (
+        (this.state.showPrompt && !prevState.showPrompt) ||
+        this.state.promptData != prevState.promptData
+      ) {
         this.props.onShowInputPrompt(this.state.promptData);
       } else if (!this.state.showPrompt && prevState.showPrompt) {
         this.props.onHideInputPrompt();
