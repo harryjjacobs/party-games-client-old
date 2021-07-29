@@ -6,7 +6,15 @@ export const INPUT_TYPE_TEXT = "text";
 export default class TextPrompt extends React.Component {
   constructor(props) {
     super(props);
-    this.state = { values: new Array(this.props.promptData.prompts.length) };
+
+    let initialValues = new Array(this.props.promptData.prompts.length);
+
+    for (let i = 0; i < Math.min(props.promptData.initialValues?.length, initialValues.length); i++)
+    {
+      initialValues[i] = props.promptData.initialValues[i];
+    }
+
+    this.state = { values: initialValues};
 
     this.handleInputChange = this.handleInputChange.bind(this);
     this.handleSubmitClick = this.handleSubmitClick.bind(this);
@@ -38,7 +46,7 @@ export default class TextPrompt extends React.Component {
           name={`textinput_${index}`}
           id={`textinput_${index}`}
           type="text"
-          value={this.state.value}
+          defaultValue={this.state.values[index]}
           maxLength={maxLength}
           onChange={(event) =>
             this.handleInputChange(index, event.target.value.toUpperCase())

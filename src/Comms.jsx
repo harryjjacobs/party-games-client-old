@@ -283,7 +283,7 @@ class Comms extends React.Component {
       }
       if (
         (this.state.showPrompt && !prevState.showPrompt) ||
-        this.state.promptData != prevState.promptData
+        this.state.promptData !== prevState.promptData
       ) {
         this.props.onShowInputPrompt(this.state.promptData);
       } else if (!this.state.showPrompt && prevState.showPrompt) {
