@@ -1,0 +1,85 @@
+.SongSearchPrompt-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  font-size: calc(10px + 2vmin);
+  padding: 10vw;
+}
+
+.SongSearchPrompt-input {
+  width: 60vw;
+  border: 1px solid #ccc;
+}
+
+.SongSearchPrompt-submit {
+  margin: 0.5em;
+  padding: 0.5em;
+  width: 10em;
+}
+
+.SongSearchPrompt-input {
+  display: block;
+}
+
+.SongSearchPrompt-label {
+  display: block;
+}
+
+.SongSearchPrompt-results-container {
+  width: 100%;
+  list-style-type: none;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  justify-content: center;
+  margin-left: 1em;
+  margin-right: 1em;
+}
+
+.SongSearchPrompt-result-item {
+  height: 10vh;
+  display: flex;
+  flex-direction: row;
+  align-items: stretch;
+  justify-content: start;
+  padding: 0;
+}
+
+.SongSearchPrompt-result-item-image {
+  height: 10vh;
+  width: 10vh;
+  display: block;
+  border-radius: 0.2em;
+}
+
+.SongSearchPrompt-result-item-details {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  justify-content: start;
+  padding-left: 0.5em;
+  text-align: left;
+  width: 10vh;
+}
+
+.SongSearchPrompt-result-title {
+  padding: 0;
+  margin: 0.3em;
+  min-width: 0;
+  font-size: calc(10px + 1.5vmin);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.SongSearchPrompt-result-subtitle {
+  padding: 0;
+  margin: 0;
+  margin-left: 0.75em;
+  font-size: calc(10px + 0.5vmin);
+  overflow: hidden;
+  text-overflow: ellipsis;
+}

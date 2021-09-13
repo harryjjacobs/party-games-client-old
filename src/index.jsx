@@ -4,30 +4,35 @@ import { BrowserRouter as Router, Route, Switch } from "react-router-dom";
 import "./index.css";
 import App from "./App";
 
-function memePromptStandalone() {
-  let PRODUCTION = process.env.NODE_ENV === "production";
-  if (!PRODUCTION) {
-    const MemePromptStandalone = require("./prompts/meme/MemePromptStandalone")
-      .default;
-    return (
-      <Route exact path="/memes/test">
-        <MemePromptStandalone />
-      </Route>
-    );
-  }
-  return null;
+function developmentRoutes() {
+	let PRODUCTION = process.env.NODE_ENV === "production";
+	if (!PRODUCTION) {
+		const MemePromptStandalone =
+			require("./prompts/meme/MemePromptStandalone").default;
+		const SongSearchPrompt =
+			require("./prompts/musiq/SongSearchPrompt").default;
+		return [
+			<Route key="memes" exact path="/meme_prompt">
+				<MemePromptStandalone />
+			</Route>,
+			<Route key="musiq" exact path="/song_search_prompt">
+				<SongSearchPrompt />
+			</Route>,
+		];
+	}
+	return null;
 }
 
 ReactDOM.render(
-  <Router>
-    <div>
-      <Switch>
-        <Route exact path="/">
-          <App />
-        </Route>
-        {memePromptStandalone()}
-      </Switch>
-    </div>
-  </Router>,
-  document.getElementById("root")
+	<Router>
+		<div>
+			<Switch>
+				<Route exact path="/">
+					<App />
+				</Route>
+				{developmentRoutes()}
+			</Switch>
+		</div>
+	</Router>,
+	document.getElementById("root")
 );
