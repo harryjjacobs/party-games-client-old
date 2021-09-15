@@ -5,6 +5,8 @@ import "./SongSearchPrompt.css";
 
 export const INPUT_TYPE_SONG_SEARCH = "song_search";
 
+const SEARCH_DEBOUNCE_TIME_MS = 300;
+
 class SongSearchPrompt extends React.Component {
 	constructor(props) {
 		super(props);
@@ -40,7 +42,15 @@ class SongSearchPrompt extends React.Component {
 		}
 	}
 
-	searchSpotify(query) {
+	debounce(func, timeout = SEARCH_DEBOUNCE_TIME_MS) {
+		let timer;
+		return (...args) => {
+			clearTimeout(timer);
+			timer = setTimeout(() => { func.apply(this, args); }, timeout);
+		};
+	}
+
+	searchSpotify = this.debounce((query) => {
 		if (query) {
 			this.cancelSearch = false;
 			this.spotifyApi
@@ -57,7 +67,7 @@ class SongSearchPrompt extends React.Component {
 			this.cancelSearch = true;
 			this.setState({ searchResults: [] });
 		}
-	}
+	});
 
 	render() {
 		return (
@@ -72,7 +82,7 @@ class SongSearchPrompt extends React.Component {
 					className="App-text-input SongSearchPrompt-input SongSearchPrompt-prompt"
 					name="textinput"
 					type="text"
-					onChange={(evt) => {
+					onChange={async (evt) => {
 						this.searchSpotify(evt.target.value);
 					}}
 				/>
@@ -86,6 +96,7 @@ class SongSearchPrompt extends React.Component {
 								onClick={() => this.handleSubmit(track)}
 							>
 								<img
+									alt="Artwork"
 									className="SongSearchPrompt-result-item-image"
 									src={track.album.images ? track.album.images[0]?.url : ""}
 								/>

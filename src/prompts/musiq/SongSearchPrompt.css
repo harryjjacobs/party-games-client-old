@@ -43,7 +43,7 @@
   display: flex;
   flex-direction: row;
   align-items: stretch;
-  justify-content: start;
+  justify-content: flex-start;
   padding: 0;
 }
 
@@ -59,7 +59,7 @@
   display: flex;
   flex-direction: column;
   align-items: stretch;
-  justify-content: start;
+  justify-content: flex-start;
   padding-left: 0.5em;
   text-align: left;
   width: 10vh;
