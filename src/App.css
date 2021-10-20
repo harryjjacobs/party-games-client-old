@@ -10,23 +10,23 @@
 }
 
 .App-header {
-  background-color: #375273;
+  background-color: #052432;
   min-height: 10vh;
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
   font-size: calc(10px + 2vmin);
-  color: white;
+  color: #efefef;
 }
 
 .App-body {
-  background-color: #282c34;
+  background-color: #efefef;
   min-height: 90vh;
   display: flex;
   flex-direction: column;
   align-items: center;
-  color: white;
+  color: #2c2c2c;
 }
 
 .App-link {
@@ -55,16 +55,15 @@
   border: none;
   text-decoration: none;
   font-size: calc(10px + 2vmin);
-  font-weight: 500;
-  color: #ffffff;
-  background-color: #4eb5f1;
+  color: #2c2c2c;
+  background-color: #61E786;
   text-align: center;
   transition: all 0.2s;
 }
 
 .App-button:hover {
-  color: #000000;
-  background-color: #4095c6;
+  color: #2c2c2c;
+  background-color: #74e494;
 }
 
 @media all and (max-width: 20em) {
@@ -112,9 +111,9 @@
 }
 
 .TextPrompt-label {
-  font-size: calc(10px + 4vmin);
+  font-size: calc(10px + 2vmin);
   margin: 0px;
-  padding: 1vmin;
+  padding: 0vmin;
   flex: 3;
 }
 
