@@ -1,16 +1,8 @@
 import React from "react";
 import MemePrompt from "./MemePrompt";
 
-import bernie from "./templates/BernieOnceAgainAsking.json";
-import boyfriend from "./templates/DistractedBoyfriend.json";
-import changeMyMind from "./templates/ChangeMyMind.json";
-import expandingBrain from "./templates/ExpandingBrain.json";
-
 const TEMPLATES = {
-  BernieOnceAgainAsking: bernie,
-  DistractedBoyfriend: boyfriend,
-  ChangeMyMind: changeMyMind,
-  ExpandingBrain: expandingBrain,
+  // TODO: remove the hardcoded templates and use query params or something with the prompt data in
 };
 
 class MemePromptStandalone extends React.Component {
