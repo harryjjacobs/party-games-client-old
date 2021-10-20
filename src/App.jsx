@@ -80,8 +80,12 @@ class App extends React.Component {
 					initialValues: [room_code, ""],
 					maxInputLength: MAX_USERNAME_LENGTH,
 				}}
-				onSubmit={(response) =>
-					this.sendJoinRequest(response.values[0], response.values[1])
+				onSubmit={(data) => {
+						if (data.values[0] !== '' && data.values[1] !== '')
+						{
+							this.sendJoinRequest(data.values[0], data.values[1])
+						}
+					}
 				}
 			/>
 		);
@@ -101,7 +105,7 @@ class App extends React.Component {
 	render() {
 		return (
 			<div className="App">
-				<header className="App-header">Party Games</header>
+				<header className="App-header">Jacobs' Party Pack</header>
 				<div className="App-body">
 					<Comms
 						ref={this.commsRef}
