@@ -1,5 +1,7 @@
 import React from "react";
 
+const PROTOCOL_VERSION = 1.0
+
 const ClientMessageNames = {
   MESSAGE_TYPE_PROMPT_RESPONSE: "prompt_response",
   MESSAGE_TYPE_REQUEST_JOIN: "request_join",
@@ -85,6 +87,7 @@ class Comms extends React.Component {
   sendMessage(messageType, messageData) {
     const message = {
       type: messageType,
+      protocolVersion: PROTOCOL_VERSION,
       data: messageData,
     };
     this.socket.send(JSON.stringify(message));
@@ -142,6 +145,11 @@ class Comms extends React.Component {
       message = JSON.parse(messageRaw);
     } catch (error) {
       console.debug("invalid message recieved", message);
+      return;
+    }
+    if (message.protocolVersion !== PROTOCOL_VERSION) {
+      console.warn(`message with incompatible message protocol version recieved. 
+      message version: ${message.protocolVersion}. our version: ${PROTOCOL_VERSION}`, message);
       return;
     }
     switch (message.type) {
